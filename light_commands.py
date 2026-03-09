@@ -1,4 +1,4 @@
-ADDRESS = "AD:D2:0A:5F:5A:A4"
+CHARACTERISTIC = "0000a040-0000-1000-8000-00805f9b34fb"
 
 
 def calc_crc(data_bytes):
@@ -41,5 +41,41 @@ def build_white_temp_packet(level):
     return packet
 
 
+def build_brightness_packet(value):
+    # clamp brightness
+    value = max(1, min(255, value))
+
+    packet = bytearray([
+        0x55, 0xAA,   # header
+        0x01,         # standard/white mode
+        0x08, 0x01,   # brightness command
+        value
+    ])
+
+    crc = calc_crc(packet)
+    packet.append(crc)
+
+    return packet
+
+
+async def set_brightness(value, characteristic, client):
+    packet = build_brightness_packet(value)
+    await client.write_gatt_char(characteristic, packet)
+
+
 async def write_to_client(packet, characteristic, client):
     await client.write_gatt_char(characteristic, packet)
+
+
+async def set_white_temp(level, client):
+    packet = build_white_temp_packet(level)
+    await write_to_client(packet, CHARACTERISTIC, client)
+
+
+async def set_rgb(r, g, b, client):
+    packet = build_rgb_packet(r, g, b)
+    await write_to_client(packet, CHARACTERISTIC, client)
+
+
+async def set_brightness_value(value, client):
+    await set_brightness(value, CHARACTERISTIC, client)

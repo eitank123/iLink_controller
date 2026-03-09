@@ -53,7 +53,6 @@ def alert_has_title(alert, titles):
 
 def listen_to_oref(cities_to_track, alert_in_city, search_for_titles, last_alert_tracker, time_between_alarms=30):
     alert = fetch_homefront_alert()
-
     if city_in_alert(alert, cities_to_track) and alert_has_title(alert, search_for_titles):
         current_time = time.time()
         if (current_time - last_alert_tracker[0]) > time_between_alarms:
